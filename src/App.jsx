@@ -120,7 +120,6 @@ function App() {
       if (e.touches && e.touches.length === 1) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
-        e.preventDefault(); // Tambahkan ini agar panning tetap berjalan di Android
       } else {
         clientX = e.clientX;
         clientY = e.clientY;
@@ -715,7 +714,7 @@ function App() {
 
         {/* Main Canvas Area */}
         <div
-          className="flex-1 fixed inset-0 bg-gradient-to-br from-gray-50 to-blue-50 canvas-area"
+          className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
           onMouseDown={e => {
             if (e.target.classList.contains('canvas-area')) {
               setIsPanning(true);
@@ -723,13 +722,17 @@ function App() {
             }
           }}
           onTouchStart={e => {
-            if (e.target.classList.contains('canvas-area') && e.touches.length === 1) {
-              e.preventDefault();
+            if (
+              e.target.classList.contains('canvas-area') &&
+              e.touches.length === 1 &&
+              !connectionMode // Jangan panning saat connect wire
+            ) {
+              e.preventDefault(); // Penting untuk Android
               setIsPanning(true);
               setPanStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
             }
           }}
-          style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none', zIndex: 0 }}
+          style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
         >
           <div className="absolute inset-0 overflow-hidden">
             {/* Enhanced Grid background */}
