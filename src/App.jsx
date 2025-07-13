@@ -714,7 +714,7 @@ function App() {
 
         {/* Main Canvas Area */}
         <div
-          className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
+          className="absolute inset-0 w-full h-full canvas-area"
           onMouseDown={e => {
             if (e.target.classList.contains('canvas-area')) {
               setIsPanning(true);
