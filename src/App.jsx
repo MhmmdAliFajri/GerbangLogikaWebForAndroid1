@@ -120,6 +120,7 @@ function App() {
       if (e.touches && e.touches.length === 1) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
+        e.preventDefault(); // Tambahkan ini agar panning tetap berjalan di Android
       } else {
         clientX = e.clientX;
         clientY = e.clientY;
@@ -723,6 +724,7 @@ function App() {
           }}
           onTouchStart={e => {
             if (e.target.classList.contains('canvas-area') && e.touches.length === 1) {
+              e.preventDefault(); // Tambahkan ini agar panning tidak bentrok dengan scroll Android
               setIsPanning(true);
               setPanStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
             }
