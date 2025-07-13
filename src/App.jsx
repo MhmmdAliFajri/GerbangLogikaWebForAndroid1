@@ -25,6 +25,8 @@ function App() {
     setConnectionMode,
     setTempConnection,
     removeConnection,
+    canvasOffset,
+    setCanvasOffset,
   } = useCircuitStore();
 
   // Drawer state
@@ -32,6 +34,10 @@ function App() {
   const fileInputRef = useRef(null);
   const saveCircuit = useCircuitStore((s) => s.saveCircuit);
   const loadCircuit = useCircuitStore((s) => s.loadCircuit);
+
+  // Panning state
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState(null);
 
   // Handle mouse move for temporary connection
   useEffect(() => {
@@ -105,6 +111,27 @@ function App() {
       document.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [connectionMode, tempConnection, setConnectionMode, setTempConnection]);
+
+  // Handler untuk drag-panning canvas
+  useEffect(() => {
+    const handlePanMouseMove = (e) => {
+      if (!isPanning || !panStart) return;
+      setCanvasOffset({
+        x: canvasOffset.x + (e.clientX - panStart.x),
+        y: canvasOffset.y + (e.clientY - panStart.y),
+      });
+      setPanStart({ x: e.clientX, y: e.clientY });
+    };
+    const handlePanMouseUp = () => setIsPanning(false);
+    if (isPanning) {
+      document.addEventListener("mousemove", handlePanMouseMove);
+      document.addEventListener("mouseup", handlePanMouseUp);
+      return () => {
+        document.removeEventListener("mousemove", handlePanMouseMove);
+        document.removeEventListener("mouseup", handlePanMouseUp);
+      };
+    }
+  }, [isPanning, panStart, canvasOffset, setCanvasOffset]);
 
   // Fungsi untuk menambah gerbang logika
   const addGate = (type) => {
@@ -672,7 +699,16 @@ function App() {
         </div>
 
         {/* Main Canvas Area */}
-        <div className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area">
+        <div className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
+          onMouseDown={e => {
+            // Mulai panning jika klik di area kosong (bukan komponen)
+            if (e.target.classList.contains('canvas-area')) {
+              setIsPanning(true);
+              setPanStart({ x: e.clientX, y: e.clientY });
+            }
+          }}
+          style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
+        >
           <div className="absolute inset-0 overflow-hidden">
             {/* Enhanced Grid background */}
             <div
@@ -684,13 +720,14 @@ function App() {
                   linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: "20px 20px, 20px 20px, 20px 20px",
+                transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px)`
               }}
             />
 
             {/* SVG for wires */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ zIndex: 1 }}
+              style={{ zIndex: 1, transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px)` }}
             >
               <defs>
                 <filter id="glow">
@@ -727,8 +764,8 @@ function App() {
 
             {/* Render components */}
             {components.map((component) => (
-              <DraggableComponent key={component.id} component={component}>
-                <LogicComponent component={component} />
+              <DraggableComponent key={component.id} component={{ ...component, position: { x: component.position.x + canvasOffset.x, y: component.position.y + canvasOffset.y } }}>
+                <LogicComponent component={{ ...component, position: { x: component.position.x + canvasOffset.x, y: component.position.y + canvasOffset.y } }} />
               </DraggableComponent>
             ))}
 
