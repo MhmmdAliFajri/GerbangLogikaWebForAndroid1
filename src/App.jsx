@@ -715,7 +715,7 @@ function App() {
 
         {/* Main Canvas Area */}
         <div
-          className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
+          className="flex-1 fixed inset-0 bg-gradient-to-br from-gray-50 to-blue-50 canvas-area"
           onMouseDown={e => {
             if (e.target.classList.contains('canvas-area')) {
               setIsPanning(true);
@@ -724,12 +724,12 @@ function App() {
           }}
           onTouchStart={e => {
             if (e.target.classList.contains('canvas-area') && e.touches.length === 1) {
-              e.preventDefault(); // Tambahkan ini agar panning tidak bentrok dengan scroll Android
+              e.preventDefault();
               setIsPanning(true);
               setPanStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
             }
           }}
-          style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
+          style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none', zIndex: 0 }}
         >
           <div className="absolute inset-0 overflow-hidden">
             {/* Enhanced Grid background */}
