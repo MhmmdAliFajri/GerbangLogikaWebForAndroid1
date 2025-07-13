@@ -56,34 +56,23 @@ const DraggableComponent = ({ component, children }) => {
   const handleMouseMove = (e) => {
     if (!isDragging) return;
 
-    const canvasRect = dragRef.current
-      .closest(".canvas-area")
-      .getBoundingClientRect();
+    const canvasRect = dragRef.current.closest(".canvas-area").getBoundingClientRect();
     const newX = e.clientX - canvasRect.left - dragOffset.x;
     const newY = e.clientY - canvasRect.top - dragOffset.y;
 
-    // Constrain to canvas bounds
-    const constrainedX = Math.max(0, Math.min(newX, canvasRect.width - 100));
-    const constrainedY = Math.max(0, Math.min(newY, canvasRect.height - 80));
-
-    updateComponentPosition(component.id, { x: constrainedX, y: constrainedY });
+    // Hilangkan constraint agar bisa drag ke mana saja (tak terbatas)
+    updateComponentPosition(component.id, { x: newX, y: newY });
   };
 
   const handleTouchMove = (e) => {
     if (!isDragging || e.touches.length !== 1) return;
 
     const touch = e.touches[0];
-    const canvasRect = dragRef.current
-      .closest(".canvas-area")
-      .getBoundingClientRect();
+    const canvasRect = dragRef.current.closest(".canvas-area").getBoundingClientRect();
     const newX = touch.clientX - canvasRect.left - dragOffset.x;
     const newY = touch.clientY - canvasRect.top - dragOffset.y;
 
-    const constrainedX = Math.max(0, Math.min(newX, canvasRect.width - 100));
-    const constrainedY = Math.max(0, Math.min(newY, canvasRect.height - 80));
-
-    updateComponentPosition(component.id, { x: constrainedX, y: constrainedY });
-
+    updateComponentPosition(component.id, { x: newX, y: newY });
     e.preventDefault();
   };
 
