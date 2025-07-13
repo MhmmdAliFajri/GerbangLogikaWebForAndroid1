@@ -112,37 +112,23 @@ function App() {
     };
   }, [connectionMode, tempConnection, setConnectionMode, setTempConnection]);
 
-  // Handler untuk drag-panning canvas (mouse & touch)
+  // Handler untuk drag-panning canvas
   useEffect(() => {
-    const handlePanMove = (e) => {
+    const handlePanMouseMove = (e) => {
       if (!isPanning || !panStart) return;
-      let clientX, clientY;
-      if (e.touches && e.touches.length === 1) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
       setCanvasOffset({
-        x: canvasOffset.x + (clientX - panStart.x),
-        y: canvasOffset.y + (clientY - panStart.y),
+        x: canvasOffset.x + (e.clientX - panStart.x),
+        y: canvasOffset.y + (e.clientY - panStart.y),
       });
-      setPanStart({ x: clientX, y: clientY });
+      setPanStart({ x: e.clientX, y: e.clientY });
     };
-    const handlePanEnd = () => setIsPanning(false);
+    const handlePanMouseUp = () => setIsPanning(false);
     if (isPanning) {
-      document.addEventListener("mousemove", handlePanMove);
-      document.addEventListener("mouseup", handlePanEnd);
-      document.addEventListener("touchmove", handlePanMove, { passive: false });
-      document.addEventListener("touchend", handlePanEnd);
-      document.addEventListener("touchcancel", handlePanEnd);
+      document.addEventListener("mousemove", handlePanMouseMove);
+      document.addEventListener("mouseup", handlePanMouseUp);
       return () => {
-        document.removeEventListener("mousemove", handlePanMove);
-        document.removeEventListener("mouseup", handlePanEnd);
-        document.removeEventListener("touchmove", handlePanMove);
-        document.removeEventListener("touchend", handlePanEnd);
-        document.removeEventListener("touchcancel", handlePanEnd);
+        document.removeEventListener("mousemove", handlePanMouseMove);
+        document.removeEventListener("mouseup", handlePanMouseUp);
       };
     }
   }, [isPanning, panStart, canvasOffset, setCanvasOffset]);
@@ -713,26 +699,15 @@ function App() {
         </div>
 
         {/* Main Canvas Area */}
-        <div
-          className="absolute inset-0 w-full h-full canvas-area"
+        <div className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
           onMouseDown={e => {
+            // Mulai panning jika klik di area kosong (bukan komponen)
             if (e.target.classList.contains('canvas-area')) {
               setIsPanning(true);
               setPanStart({ x: e.clientX, y: e.clientY });
             }
           }}
-          onTouchStart={e => {
-            if (
-              e.target.classList.contains('canvas-area') &&
-              e.touches.length === 1 &&
-              !connectionMode // Jangan panning saat connect wire
-            ) {
-              e.preventDefault(); // Penting untuk Android
-              setIsPanning(true);
-              setPanStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-            }
-          }}
-          style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
+          style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
         >
           <div className="absolute inset-0 overflow-hidden">
             {/* Enhanced Grid background */}
