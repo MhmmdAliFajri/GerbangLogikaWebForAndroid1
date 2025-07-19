@@ -27,6 +27,9 @@ function App() {
     removeConnection,
     canvasOffset,
     setCanvasOffset,
+    zoom,
+    setZoom,
+    resetZoom,
   } = useCircuitStore();
 
   // Drawer state
@@ -112,26 +115,80 @@ function App() {
     };
   }, [connectionMode, tempConnection, setConnectionMode, setTempConnection]);
 
-  // Handler untuk drag-panning canvas
+  // Pinch to zoom (mobile)
+  useEffect(() => {
+    let lastDist = null;
+    const handlePinch = (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (lastDist !== null) {
+          let newZoom = zoom * (dist / lastDist);
+          newZoom = Math.max(0.3, Math.min(2.5, newZoom));
+          setZoom(newZoom);
+        }
+        lastDist = dist;
+      }
+    };
+    const handlePinchEnd = () => {
+      lastDist = null;
+    };
+    const canvas = document.querySelector('.canvas-area');
+    if (canvas) {
+      canvas.addEventListener('touchmove', handlePinch, { passive: false });
+      canvas.addEventListener('touchend', handlePinchEnd);
+      canvas.addEventListener('touchcancel', handlePinchEnd);
+    }
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener('touchmove', handlePinch);
+        canvas.removeEventListener('touchend', handlePinchEnd);
+        canvas.removeEventListener('touchcancel', handlePinchEnd);
+      }
+    };
+  }, [zoom, setZoom]);
+
+  // Handler untuk drag-panning canvas (mouse & touch)
   useEffect(() => {
     const handlePanMouseMove = (e) => {
       if (!isPanning || !panStart) return;
-      setCanvasOffset({
-        x: canvasOffset.x + (e.clientX - panStart.x),
-        y: canvasOffset.y + (e.clientY - panStart.y),
-      });
+      setCanvasOffset((prev) => ({
+        x: prev.x + (e.clientX - panStart.x),
+        y: prev.y + (e.clientY - panStart.y),
+      }));
       setPanStart({ x: e.clientX, y: e.clientY });
     };
     const handlePanMouseUp = () => setIsPanning(false);
+
+    // Touch events
+    const handlePanTouchMove = (e) => {
+      if (!isPanning || !panStart || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      setCanvasOffset((prev) => ({
+        x: prev.x + (touch.clientX - panStart.x),
+        y: prev.y + (touch.clientY - panStart.y),
+      }));
+      setPanStart({ x: touch.clientX, y: touch.clientY });
+      e.preventDefault();
+    };
+    const handlePanTouchEnd = () => setIsPanning(false);
+
     if (isPanning) {
       document.addEventListener("mousemove", handlePanMouseMove);
       document.addEventListener("mouseup", handlePanMouseUp);
+      document.addEventListener("touchmove", handlePanTouchMove, { passive: false });
+      document.addEventListener("touchend", handlePanTouchEnd);
+      document.addEventListener("touchcancel", handlePanTouchEnd);
       return () => {
         document.removeEventListener("mousemove", handlePanMouseMove);
         document.removeEventListener("mouseup", handlePanMouseUp);
+        document.removeEventListener("touchmove", handlePanTouchMove);
+        document.removeEventListener("touchend", handlePanTouchEnd);
+        document.removeEventListener("touchcancel", handlePanTouchEnd);
       };
     }
-  }, [isPanning, panStart, canvasOffset, setCanvasOffset]);
+  }, [isPanning, panStart, setCanvasOffset]);
 
   // Fungsi untuk menambah gerbang logika
   const addGate = (type) => {
@@ -169,14 +226,14 @@ function App() {
   const SidebarContent = () => (
     <>
       <h2 className="text-xl font-bold mb-6 text-gray-800 flex items-center">
-        <span className="mr-2">🧩</span>
+        <span className="mr-2"> </span>
         Komponen
       </h2>
 
       {/* Input/Output */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-4 text-gray-700 flex items-center">
-          <span className="mr-2">🔌</span>
+          <span className="mr-2"></span>
           Input/Output
         </h3>
         <div className="grid grid-cols-1 gap-3">
@@ -225,7 +282,7 @@ function App() {
       {/* Logic Gates */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-4 text-gray-700 flex items-center">
-          <span className="mr-2">⚙️</span>
+          <span className="mr-2"></span>
           Gerbang Logika Dasar
         </h3>
         <div className="grid grid-cols-2 gap-3">
@@ -260,7 +317,7 @@ function App() {
       {/* Flip-Flop Section */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-4 text-gray-700 flex items-center">
-          <span className="mr-2">🔄</span>
+          <span className="mr-2"></span>
           Flip-Flop
         </h3>
         <div className="grid grid-cols-2 gap-3">
@@ -699,7 +756,8 @@ function App() {
         </div>
 
         {/* Main Canvas Area */}
-        <div className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
+        <div
+          className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
           onMouseDown={e => {
             // Mulai panning jika klik di area kosong (bukan komponen)
             if (e.target.classList.contains('canvas-area')) {
@@ -707,9 +765,38 @@ function App() {
               setPanStart({ x: e.clientX, y: e.clientY });
             }
           }}
-          style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
+          onTouchStart={e => {
+            // Mulai panning jika tap di area kosong (bukan komponen)
+            if (e.target.classList.contains('canvas-area') && e.touches.length === 1) {
+              setIsPanning(true);
+              const touch = e.touches[0];
+              setPanStart({ x: touch.clientX, y: touch.clientY });
+            }
+          }}
+          style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
         >
-          <div className="absolute inset-0 overflow-hidden">
+          {/* Zoom Controls */}
+          <div style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button
+              onClick={() => setZoom(Math.min(2.5, zoom + 0.1))}
+              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 40, height: 40, fontSize: 24, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              aria-label="Zoom In"
+            >+
+            </button>
+            <button
+              onClick={() => setZoom(Math.max(0.3, zoom - 0.1))}
+              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 40, height: 40, fontSize: 24, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              aria-label="Zoom Out"
+            >−
+            </button>
+            <button
+              onClick={() => resetZoom()}
+              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 40, height: 40, fontSize: 16, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              aria-label="Reset Zoom"
+            >⟳
+            </button>
+          </div>
+          <div className="absolute inset-0 overflow-hidden" style={{ touchAction: 'none', width: '100%', height: '100%' }}>
             {/* Enhanced Grid background */}
             <div
               className="absolute inset-0 opacity-30"
@@ -720,14 +807,15 @@ function App() {
                   linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: "20px 20px, 20px 20px, 20px 20px",
-                transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px)`
+                transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`,
+                transformOrigin: '0 0'
               }}
             />
 
             {/* SVG for wires */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ zIndex: 1, transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px)` }}
+              style={{ zIndex: 1, transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`, transformOrigin: '0 0' }}
             >
               <defs>
                 <filter id="glow">
@@ -764,8 +852,25 @@ function App() {
 
             {/* Render components */}
             {components.map((component) => (
-              <DraggableComponent key={component.id} component={{ ...component, position: { x: component.position.x + canvasOffset.x, y: component.position.y + canvasOffset.y } }}>
-                <LogicComponent component={{ ...component, position: { x: component.position.x + canvasOffset.x, y: component.position.y + canvasOffset.y } }} />
+              <DraggableComponent
+                key={component.id}
+                component={{
+                  ...component,
+                  position: {
+                    x: (component.position.x + canvasOffset.x) * zoom,
+                    y: (component.position.y + canvasOffset.y) * zoom,
+                  },
+                }}
+              >
+                <LogicComponent
+                  component={{
+                    ...component,
+                    position: {
+                      x: (component.position.x + canvasOffset.x) * zoom,
+                      y: (component.position.y + canvasOffset.y) * zoom,
+                    },
+                  }}
+                />
               </DraggableComponent>
             ))}
 
