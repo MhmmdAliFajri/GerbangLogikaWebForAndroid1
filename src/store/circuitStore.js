@@ -31,6 +31,11 @@ export const useCircuitStore = create((set, get) => ({
   
   // State untuk zoom level (untuk layar kecil)
   zoom: 1,
+
+  // Action untuk set zoom
+  setZoom: (zoom) => set({ zoom }),
+  // Action untuk reset zoom
+  resetZoom: () => set({ zoom: 1 }),
   
   // Action untuk menambah komponen baru
   addComponent: (component) => set((state) => ({
