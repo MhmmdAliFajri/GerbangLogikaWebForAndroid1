@@ -206,7 +206,7 @@ function App() {
     const newComponent = {
       type,
       position: {
-        x: type === "INPUT" ? 50 : 400,
+        x: type === "INPUT" ? 50 : 200, // Output lebih ke kiri agar selalu terlihat
         y: 100 + Math.random() * 200,
       },
       inputs: type === "INPUT" ? 0 : 1,
@@ -802,102 +802,103 @@ function App() {
               touchAction: 'none',
               width: '100%',
               height: '100%',
-              transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`,
-              transformOrigin: '0 0',
+              // Only the outer container is transformed
+              // All children (grid, wires, components) are inside this scaled and translated container
+              pointerEvents: 'auto',
             }}
           >
-            {/* Enhanced Grid background */}
             <div
-              className="absolute inset-0 opacity-30"
               style={{
-                backgroundImage: `
-                  radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.3) 1px, transparent 0),
-                  linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
-                `,
-                backgroundSize: "20px 20px, 20px 20px, 20px 20px",
+                width: '100%',
+                height: '100%',
+                transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`,
+                transformOrigin: '0 0',
+                position: 'absolute',
+                top: 0,
+                left: 0,
               }}
-            />
-
-            {/* SVG for wires */}
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ zIndex: 1 }}
             >
-              <defs>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
+              {/* Enhanced Grid background */}
+              <div
+                className="absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage: `
+                    radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.3) 1px, transparent 0),
+                    linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px, 20px 20px, 20px 20px",
+                }}
+              />
 
-              {/* Render existing connections */}
-              {connections.map((connection) => (
-                <Wire
-                  key={connection.id}
-                  connection={connection}
-                  onDelete={removeConnection}
-                />
+              {/* SVG for wires */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                style={{ zIndex: 1 }}
+              >
+                <defs>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* Render existing connections */}
+                {connections.map((connection) => (
+                  <Wire
+                    key={connection.id}
+                    connection={connection}
+                    onDelete={removeConnection}
+                  />
+                ))}
+
+                {/* Render temporary connection */}
+                {tempConnection && (
+                  <path
+                    d={`M ${tempConnection.fromPos.x} ${tempConnection.fromPos.y} L ${tempConnection.toPos.x} ${tempConnection.toPos.y}`}
+                    stroke="#6b7280"
+                    strokeWidth="3"
+                    strokeDasharray="8,4"
+                    fill="none"
+                    filter="url(#glow)"
+                    className="animate-pulse"
+                  />
+                )}
+              </svg>
+
+              {/* Render components (no manual offset, just use original position) */}
+              {components.map((component) => (
+                <DraggableComponent
+                  key={component.id}
+                  component={component}
+                >
+                  <LogicComponent
+                    component={component}
+                  />
+                </DraggableComponent>
               ))}
 
-              {/* Render temporary connection */}
-              {tempConnection && (
-                <path
-                  d={`M ${tempConnection.fromPos.x} ${tempConnection.fromPos.y} L ${tempConnection.toPos.x} ${tempConnection.toPos.y}`}
-                  stroke="#6b7280"
-                  strokeWidth="3"
-                  strokeDasharray="8,4"
-                  fill="none"
-                  filter="url(#glow)"
-                  className="animate-pulse"
-                />
-              )}
-            </svg>
-
-            {/* Render components */}
-            {components.map((component) => (
-              <DraggableComponent
-                key={component.id}
-                component={{
-                  ...component,
-                  position: {
-                    x: component.position.x + canvasOffset.x,
-                    y: component.position.y + canvasOffset.y,
-                  },
-                }}
-              >
-                <LogicComponent
-                  component={{
-                    ...component,
-                    position: {
-                      x: component.position.x + canvasOffset.x,
-                      y: component.position.y + canvasOffset.y,
-                    },
-                  }}
-                />
-              </DraggableComponent>
-            ))}
-
-            {/* Enhanced instructions overlay when no components */}
-            {components.length === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-gray-500 p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 float">
-                  <div className="text-6xl mb-4">🚀</div>
-                  <h3 className="text-2xl font-semibold mb-3 text-gray-700">
-                    Canvas Kosong
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Tambahkan komponen dari sidebar untuk memulai
-                  </p>
-                  <div className="text-sm text-gray-500">
-                    Mulai dengan menambahkan Input Switch dan Output LED
+              {/* Enhanced instructions overlay when no components */}
+              {components.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-gray-500 p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 float">
+                    <div className="text-6xl mb-4">🚀</div>
+                    <h3 className="text-2xl font-semibold mb-3 text-gray-700">
+                      Canvas Kosong
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Tambahkan komponen dari sidebar untuk memulai
+                    </p>
+                    <div className="text-sm text-gray-500">
+                      Mulai dengan menambahkan Input Switch dan Output LED
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
