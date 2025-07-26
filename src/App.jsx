@@ -796,7 +796,16 @@ function App() {
             >⟳
             </button>
           </div>
-          <div className="absolute inset-0 overflow-hidden" style={{ touchAction: 'none', width: '100%', height: '100%' }}>
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{
+              touchAction: 'none',
+              width: '100%',
+              height: '100%',
+              transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`,
+              transformOrigin: '0 0',
+            }}
+          >
             {/* Enhanced Grid background */}
             <div
               className="absolute inset-0 opacity-30"
@@ -807,15 +816,13 @@ function App() {
                   linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
                 `,
                 backgroundSize: "20px 20px, 20px 20px, 20px 20px",
-                transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`,
-                transformOrigin: '0 0'
               }}
             />
 
             {/* SVG for wires */}
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
-              style={{ zIndex: 1, transform: `translate(${canvasOffset.x}px, ${canvasOffset.y}px) scale(${zoom})`, transformOrigin: '0 0' }}
+              style={{ zIndex: 1 }}
             >
               <defs>
                 <filter id="glow">
@@ -857,8 +864,8 @@ function App() {
                 component={{
                   ...component,
                   position: {
-                    x: (component.position.x + canvasOffset.x) * zoom,
-                    y: (component.position.y + canvasOffset.y) * zoom,
+                    x: component.position.x + canvasOffset.x,
+                    y: component.position.y + canvasOffset.y,
                   },
                 }}
               >
@@ -866,8 +873,8 @@ function App() {
                   component={{
                     ...component,
                     position: {
-                      x: (component.position.x + canvasOffset.x) * zoom,
-                      y: (component.position.y + canvasOffset.y) * zoom,
+                      x: component.position.x + canvasOffset.x,
+                      y: component.position.y + canvasOffset.y,
                     },
                   }}
                 />
