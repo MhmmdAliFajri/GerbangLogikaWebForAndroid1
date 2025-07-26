@@ -305,26 +305,47 @@ export const useCircuitStore = create((set, get) => ({
       isBlobSupported = !!new Blob();
     } catch (e) {}
 
-    if (isBlobSupported && window.URL && window.URL.createObjectURL) {
+    // Deteksi WebView (Android/iOS/Flutter/ReactNative)
+    function isWebView() {
+      const ua = navigator.userAgent || '';
+      return (
+        /wv|webview|android.*version\/\d+\.\d+|iphone|ipad|ipod.*safari/i.test(ua) ||
+        window.ReactNativeWebView ||
+        (window.flutter_inappwebview && window.flutter_inappwebview.callHandler)
+      );
+    }
+
+    let didDownload = false;
+    if (isBlobSupported && window.URL && window.URL.createObjectURL && !isWebView()) {
       // Cara biasa (PC/Browser)
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'circuit.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } else {
+      try {
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'circuit.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        didDownload = true;
+      } catch (e) {}
+    }
+    if (!didDownload) {
       // Fallback: Data URL (lebih kompatibel di WebView)
-      const base64 = btoa(unescape(encodeURIComponent(json)));
-      const a = document.createElement('a');
-      a.href = 'data:application/json;base64,' + base64;
-      a.download = 'circuit.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      try {
+        const base64 = btoa(unescape(encodeURIComponent(json)));
+        const a = document.createElement('a');
+        a.href = 'data:application/json;base64,' + base64;
+        a.download = 'circuit.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        didDownload = true;
+      } catch (e) {}
+    }
+    if (!didDownload) {
+      alert('Fitur download tidak didukung di browser ini. Silakan gunakan browser desktop atau aplikasi dengan fitur ekspor.');
     }
   },
   
