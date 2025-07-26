@@ -298,15 +298,34 @@ export const useCircuitStore = create((set, get) => ({
       mode: state.mode
     };
     const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'circuit.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+
+    // Cek dukungan Blob
+    let isBlobSupported = false;
+    try {
+      isBlobSupported = !!new Blob();
+    } catch (e) {}
+
+    if (isBlobSupported && window.URL && window.URL.createObjectURL) {
+      // Cara biasa (PC/Browser)
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'circuit.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } else {
+      // Fallback: Data URL (lebih kompatibel di WebView)
+      const base64 = btoa(unescape(encodeURIComponent(json)));
+      const a = document.createElement('a');
+      a.href = 'data:application/json;base64,' + base64;
+      a.download = 'circuit.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   },
   
   // Action untuk memuat rangkaian dari file JSON
