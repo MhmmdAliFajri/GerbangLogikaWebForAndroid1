@@ -8,20 +8,29 @@ const TruthTable = () => {
   const { components, generateTruthTable } = useCircuitStore();
 
   const inputComponents = components.filter(c => c.type === 'INPUT');
-  const outputComponents = components.filter(c => c.type === 'OUTPUT' || c.type === 'OUTPUT_LED_ICON');
+  // Hanya output tipe OUTPUT yang masuk tabel kebenaran
+  const outputComponents = components.filter(c => c.type === 'OUTPUT');
 
   const handleGenerateTable = () => {
     if (inputComponents.length === 0) {
       alert('Tambahkan minimal satu input untuk generate tabel kebenaran');
       return;
     }
-    
     if (outputComponents.length === 0) {
       alert('Tambahkan minimal satu output untuk generate tabel kebenaran');
       return;
     }
-
-    const table = generateTruthTable();
+    let table;
+    try {
+      table = generateTruthTable();
+    } catch (err) {
+      alert('Gagal generate tabel kebenaran. Coba cek rangkaian Anda.');
+      return;
+    }
+    if (!table || !Array.isArray(table) || table.length === 0) {
+      alert('Tabel kebenaran tidak dapat dihasilkan. Pastikan rangkaian valid.');
+      return;
+    }
     setTruthTable(table);
     setShowTable(true);
   };
