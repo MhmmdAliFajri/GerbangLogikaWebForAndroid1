@@ -447,7 +447,7 @@ function App() {
       )}
 
       {/* Truth Table */}
-      <div className="mb-8">
+      <div className="mb-8" style={{ maxHeight: 'none', overflow: 'visible' }}>
         <TruthTable />
       </div>
 
@@ -758,7 +758,7 @@ function App() {
               <path d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <div className="p-6 pt-16 overflow-y-auto h-full" onClick={() => setDrawerOpen(false)}>
+          <div className="p-6 pt-16 overflow-y-auto h-full" style={{ maxHeight: 'none', overflow: 'visible' }} onClick={() => setDrawerOpen(false)}>
             <SidebarContent />
           </div>
         </div>
