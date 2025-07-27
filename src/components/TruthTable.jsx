@@ -8,7 +8,7 @@ const TruthTable = () => {
   const { components, generateTruthTable } = useCircuitStore();
 
   const inputComponents = components.filter(c => c.type === 'INPUT');
-  const outputComponents = components.filter(c => c.type === 'OUTPUT');
+  const outputComponents = components.filter(c => c.type === 'OUTPUT' || c.type === 'OUTPUT_LED_ICON');
 
   const handleGenerateTable = () => {
     if (inputComponents.length === 0) {
