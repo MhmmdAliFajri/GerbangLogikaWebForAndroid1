@@ -69,30 +69,30 @@ const TruthTable = () => {
   }
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-h-96 overflow-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Tabel Kebenaran</h3>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={exportToCSV}>
+    <div className="p-2 bg-white rounded-lg shadow-md max-h-60 overflow-auto">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-base font-semibold">Tabel Kebenaran</h3>
+        <div className="flex gap-1">
+          <Button size="sm" variant="outline" onClick={exportToCSV} style={{ fontSize: 12, padding: '2px 8px' }}>
             Export CSV
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setShowTable(false)}>
+          <Button size="sm" variant="outline" onClick={() => setShowTable(false)} style={{ fontSize: 12, padding: '2px 8px' }}>
             Tutup
           </Button>
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full border-collapse border border-gray-300 text-xs">
           <thead>
             <tr className="bg-gray-100">
               {inputComponents.map(input => (
-                <th key={input.id} className="border border-gray-300 px-3 py-2 text-sm font-medium">
+                <th key={input.id} className="border border-gray-300 px-1 py-1 font-medium">
                   Input {input.id.split('_')[1]}
                 </th>
               ))}
               {outputComponents.map(output => (
-                <th key={output.id} className="border border-gray-300 px-3 py-2 text-sm font-medium">
+                <th key={output.id} className="border border-gray-300 px-1 py-1 font-medium">
                   Output {output.id.split('_')[1]}
                 </th>
               ))}
@@ -102,12 +102,12 @@ const TruthTable = () => {
             {truthTable.map((row, idx) => (
               <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                 {inputComponents.map(input => (
-                  <td key={input.id} className="border border-gray-300 px-3 py-2 text-center">
+                  <td key={input.id} className="border border-gray-300 px-1 py-1 text-center">
                     {row[input.id] ? '1' : '0'}
                   </td>
                 ))}
                 {outputComponents.map(output => (
-                  <td key={output.id} className="border border-gray-300 px-3 py-2 text-center">
+                  <td key={output.id} className="border border-gray-300 px-1 py-1 text-center">
                     {row[output.id] ? '1' : '0'}
                   </td>
                 ))}
@@ -117,7 +117,7 @@ const TruthTable = () => {
         </table>
       </div>
 
-      <div className="mt-4 text-sm text-gray-600">
+      <div className="mt-2 text-xs text-gray-600">
         <p>Total kombinasi: {truthTable.length}</p>
         <p>Input: {inputComponents.length}, Output: {outputComponents.length}</p>
       </div>
