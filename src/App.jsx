@@ -9,6 +9,10 @@ import AppLogo from "./components/AppLogo";
 import LampuIcon from "./components/LampuIcon";
 import "./App.css";
 
+// Batasi minimum zoom agar tidak terlalu kecil
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2.5;
+
 function App() {
   const {
     components,
@@ -125,7 +129,7 @@ function App() {
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (lastDist !== null) {
           let newZoom = zoom * (dist / lastDist);
-          newZoom = Math.max(0.3, Math.min(2.5, newZoom));
+          newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
           setZoom(newZoom);
         }
         lastDist = dist;
@@ -153,9 +157,11 @@ function App() {
   useEffect(() => {
     const handlePanMouseMove = (e) => {
       if (!isPanning || !panStart) return;
+      const deltaX = (e.clientX - panStart.x) / zoom;
+      const deltaY = (e.clientY - panStart.y) / zoom;
       setCanvasOffset((prev) => ({
-        x: prev.x + (e.clientX - panStart.x),
-        y: prev.y + (e.clientY - panStart.y),
+        x: prev.x + deltaX,
+        y: prev.y + deltaY,
       }));
       setPanStart({ x: e.clientX, y: e.clientY });
     };
@@ -165,12 +171,14 @@ function App() {
     const handlePanTouchMove = (e) => {
       if (!isPanning || !panStart || e.touches.length !== 1) return;
       const touch = e.touches[0];
+      const deltaX = (touch.clientX - panStart.x) / zoom;
+      const deltaY = (touch.clientY - panStart.y) / zoom;
       setCanvasOffset((prev) => ({
-        x: prev.x + (touch.clientX - panStart.x),
-        y: prev.y + (touch.clientY - panStart.y),
+        x: prev.x + deltaX,
+        y: prev.y + deltaY,
       }));
       setPanStart({ x: touch.clientX, y: touch.clientY });
-      e.preventDefault();
+      if (isPanning) e.preventDefault();
     };
     const handlePanTouchEnd = () => setIsPanning(false);
 
@@ -778,20 +786,20 @@ function App() {
           {/* Zoom Controls */}
           <div style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button
-              onClick={() => setZoom(Math.min(2.5, zoom + 0.1))}
-              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 40, height: 40, fontSize: 24, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              onClick={() => setZoom(Math.min(MAX_ZOOM, zoom + 0.1))}
+              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 56, height: 56, fontSize: 28, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
               aria-label="Zoom In"
             >+
             </button>
             <button
-              onClick={() => setZoom(Math.max(0.3, zoom - 0.1))}
-              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 40, height: 40, fontSize: 24, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              onClick={() => setZoom(Math.max(MIN_ZOOM, zoom - 0.1))}
+              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 56, height: 56, fontSize: 28, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
               aria-label="Zoom Out"
             >−
             </button>
             <button
               onClick={() => resetZoom()}
-              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 40, height: 40, fontSize: 16, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 56, height: 56, fontSize: 20, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
               aria-label="Reset Zoom"
             >⟳
             </button>
@@ -874,6 +882,7 @@ function App() {
                 <DraggableComponent
                   key={component.id}
                   component={component}
+                  style={{ minWidth: 48, minHeight: 48, touchAction: 'none' }}
                 >
                   <LogicComponent
                     component={component}
