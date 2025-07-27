@@ -153,9 +153,11 @@ function App() {
   useEffect(() => {
     const handlePanMouseMove = (e) => {
       if (!isPanning || !panStart) return;
+      const deltaX = (e.clientX - panStart.x) / zoom;
+      const deltaY = (e.clientY - panStart.y) / zoom;
       setCanvasOffset((prev) => ({
-        x: prev.x + (e.clientX - panStart.x),
-        y: prev.y + (e.clientY - panStart.y),
+        x: prev.x + deltaX,
+        y: prev.y + deltaY,
       }));
       setPanStart({ x: e.clientX, y: e.clientY });
     };
@@ -165,12 +167,13 @@ function App() {
     const handlePanTouchMove = (e) => {
       if (!isPanning || !panStart || e.touches.length !== 1) return;
       const touch = e.touches[0];
+      const deltaX = (touch.clientX - panStart.x) / zoom;
+      const deltaY = (touch.clientY - panStart.y) / zoom;
       setCanvasOffset((prev) => ({
-        x: prev.x + (touch.clientX - panStart.x),
-        y: prev.y + (touch.clientY - panStart.y),
+        x: prev.x + deltaX,
+        y: prev.y + deltaY,
       }));
       setPanStart({ x: touch.clientX, y: touch.clientY });
-      // preventDefault hanya jika benar-benar panning
       if (isPanning) e.preventDefault();
     };
     const handlePanTouchEnd = () => setIsPanning(false);
@@ -760,15 +763,15 @@ function App() {
         <div
           className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
           onMouseDown={e => {
-            // Mulai panning hanya jika klik di area kosong (bukan komponen)
-            if (e.target === e.currentTarget) {
+            // Mulai panning jika klik di area kosong (bukan komponen)
+            if (e.target.classList.contains('canvas-area')) {
               setIsPanning(true);
               setPanStart({ x: e.clientX, y: e.clientY });
             }
           }}
           onTouchStart={e => {
-            // Mulai panning hanya jika tap di area kosong (bukan komponen)
-            if (e.target === e.currentTarget && e.touches.length === 1) {
+            // Mulai panning jika tap di area kosong (bukan komponen)
+            if (e.target.classList.contains('canvas-area') && e.touches.length === 1) {
               setIsPanning(true);
               const touch = e.touches[0];
               setPanStart({ x: touch.clientX, y: touch.clientY });
