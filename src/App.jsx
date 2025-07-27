@@ -170,7 +170,8 @@ function App() {
         y: prev.y + (touch.clientY - panStart.y),
       }));
       setPanStart({ x: touch.clientX, y: touch.clientY });
-      e.preventDefault();
+      // preventDefault hanya jika benar-benar panning
+      if (isPanning) e.preventDefault();
     };
     const handlePanTouchEnd = () => setIsPanning(false);
 
@@ -759,15 +760,15 @@ function App() {
         <div
           className="flex-1 relative bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen canvas-area"
           onMouseDown={e => {
-            // Mulai panning jika klik di area kosong (bukan komponen)
-            if (e.target.classList.contains('canvas-area')) {
+            // Mulai panning hanya jika klik di area kosong (bukan komponen)
+            if (e.target === e.currentTarget) {
               setIsPanning(true);
               setPanStart({ x: e.clientX, y: e.clientY });
             }
           }}
           onTouchStart={e => {
-            // Mulai panning jika tap di area kosong (bukan komponen)
-            if (e.target.classList.contains('canvas-area') && e.touches.length === 1) {
+            // Mulai panning hanya jika tap di area kosong (bukan komponen)
+            if (e.target === e.currentTarget && e.touches.length === 1) {
               setIsPanning(true);
               const touch = e.touches[0];
               setPanStart({ x: touch.clientX, y: touch.clientY });
