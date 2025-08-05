@@ -34,14 +34,13 @@ const Wire = ({ connection, onDelete, zoom = 1 }) => {
   const signalValue = getSignalValue();
   const wireColor = signalValue ? "#22c55e" : "#6b7280"; // Green for 1, gray for 0
   // Dynamic wire width for visibility at low zoom
-  const baseWidth = isSelected ? 6 : signalValue ? 3 : 2;
-  // Always keep wire at least 2px on screen, regardless of zoom
-  // For WebView, use 3px minimum for extra visibility
+  // On mobile/webview, use larger base and min width for wire visibility
   const isWebView = typeof window !== 'undefined' && (
     window.ReactNativeWebView ||
     /wv|webview|android|iphone|ipad|ipod/i.test(navigator.userAgent)
   );
-  const minScreenWidth = isWebView ? 3 : 2;
+  const baseWidth = isWebView ? (isSelected ? 8 : signalValue ? 5 : 4) : (isSelected ? 6 : signalValue ? 3 : 2);
+  const minScreenWidth = isWebView ? 4 : 2;
   const wireWidth = Math.max(baseWidth / zoom, minScreenWidth);
 
   const handleContextMenu = (e) => {
