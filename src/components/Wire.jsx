@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useCircuitStore } from "../store/circuitStore";
 
-const Wire = ({ connection, onDelete }) => {
+const Wire = ({ connection, onDelete, zoom = 1 }) => {
   const { from, fromPos, toPos } = connection;
   const { outputValues, inputValues, components, mode } = useCircuitStore();
   const [isSelected, setIsSelected] = useState(false);
@@ -33,7 +33,15 @@ const Wire = ({ connection, onDelete }) => {
 
   const signalValue = getSignalValue();
   const wireColor = signalValue ? "#22c55e" : "#6b7280"; // Green for 1, gray for 0
-  const wireWidth = isSelected ? "6" : signalValue ? "3" : "2";
+  // Dynamic wire width for visibility at low zoom
+  // On mobile/webview, use larger base and min width for wire visibility
+  const isWebView = typeof window !== 'undefined' && (
+    window.ReactNativeWebView ||
+    /wv|webview|android|iphone|ipad|ipod/i.test(navigator.userAgent)
+  );
+  const baseWidth = isWebView ? (isSelected ? 8 : signalValue ? 5 : 4) : (isSelected ? 6 : signalValue ? 3 : 2);
+  const minScreenWidth = isWebView ? 4 : 2;
+  const wireWidth = Math.max(baseWidth / zoom, minScreenWidth);
 
   const handleContextMenu = (e) => {
     e.preventDefault();
