@@ -39,9 +39,15 @@ const Wire = ({ connection, onDelete, zoom = 1 }) => {
     window.ReactNativeWebView ||
     /wv|webview|android|iphone|ipad|ipod/i.test(navigator.userAgent)
   );
-  const baseWidth = isWebView ? (isSelected ? 8 : signalValue ? 5 : 4) : (isSelected ? 6 : signalValue ? 3 : 2);
-  const minScreenWidth = isWebView ? 4 : 2;
-  const wireWidth = Math.max(baseWidth / zoom, minScreenWidth);
+  // On WebView/mobile, use fixed width (not affected by zoom) for max visibility
+  let wireWidth;
+  if (isWebView) {
+    wireWidth = isSelected ? 8 : signalValue ? 5 : 4; // Always fixed, never < 4px
+  } else {
+    const baseWidth = isSelected ? 6 : signalValue ? 3 : 2;
+    const minScreenWidth = 2;
+    wireWidth = Math.max(baseWidth / zoom, minScreenWidth);
+  }
 
   const handleContextMenu = (e) => {
     e.preventDefault();
