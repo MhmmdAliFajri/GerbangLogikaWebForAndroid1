@@ -309,7 +309,7 @@ function App() {
               size="sm"
               onClick={() => addGate(type)}
               disabled={mode === "simulate"}
-              className={`gate-button h-12 bg-gradient-to-r from-${color}-50 to-${color}-100 border-${color}-200 hover:from-${color}-100 hover:to-${color}-200 text-${color}-800 font-semibold`}
+              className="gate-button h-12 bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-800 font-semibold"
             >
               <img
                 src={image}
@@ -344,7 +344,7 @@ function App() {
               })
             }
             disabled={mode === "simulate"}
-            className="gate-button h-12 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200 text-purple-800 font-semibold"
+            className="gate-button h-12 bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-800 font-semibold"
           >
             SR Flip-Flop
           </Button>
@@ -363,7 +363,7 @@ function App() {
               })
             }
             disabled={mode === "simulate"}
-            className="gate-button h-12 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200 text-purple-800 font-semibold"
+            className="gate-button h-12 bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-800 font-semibold"
           >
             D Flip-Flop
           </Button>
@@ -382,7 +382,7 @@ function App() {
               })
             }
             disabled={mode === "simulate"}
-            className="gate-button h-12 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200 text-purple-800 font-semibold"
+            className="gate-button h-12 bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-800 font-semibold"
           >
             JK Flip-Flop
           </Button>
@@ -401,7 +401,7 @@ function App() {
               })
             }
             disabled={mode === "simulate"}
-            className="gate-button h-12 bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200 text-purple-800 font-semibold"
+            className="gate-button h-12 bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-800 font-semibold"
           >
             T Flip-Flop
           </Button>
@@ -622,11 +622,11 @@ function App() {
               onClick={() => setMode("edit")}
               size="icon"
               variant="outline"
-              className={`border-2 ${
+              className={`border-4 ${
                 mode === "edit"
-                  ? "border-purple-500 bg-white text-purple-700 shadow-purple-200"
+                  ? "border-purple-600 bg-white text-purple-900 shadow-lg shadow-purple-300 ring-2 ring-purple-400"
                   : "border-purple-300 bg-white/80 text-purple-400 hover:bg-white"
-              } rounded-md p-1`}
+              } rounded-md p-1 transition-all duration-150`}
               title="Edit Mode"
               style={{ minWidth: 0 }}
             >
@@ -653,11 +653,11 @@ function App() {
               }}
               size="icon"
               variant="outline"
-              className={`border-2 ${
+              className={`border-4 ${
                 mode === "simulate"
-                  ? "border-purple-500 bg-purple-100 text-black shadow-purple-200"
+                  ? "border-purple-600 bg-purple-200 text-black shadow-lg shadow-purple-300 ring-2 ring-purple-400"
                   : "border-purple-300 bg-white/80 text-black hover:bg-purple-50"
-              } rounded-md p-1`}
+              } rounded-md p-1 transition-all duration-150`}
               title="Simulate Mode"
               style={{ minWidth: 0 }}
             >
@@ -783,26 +783,30 @@ function App() {
           }}
           style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
         >
-          {/* Zoom Controls */}
-          <div style={{ position: 'absolute', right: 16, bottom: 16, zIndex: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {/* Zoom Controls - selalu tampil di kanan bawah, responsif */}
+          <div style={{ position: 'fixed', right: 18, bottom: 24, zIndex: 50, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', transition: 'bottom 0.2s' }}>
             <button
               onClick={() => setZoom(Math.min(MAX_ZOOM, zoom + 0.1))}
-              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 56, height: 56, fontSize: 28, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              style={{ background: '#fff', border: '1.5px solid #e0e7ef', borderRadius: 12, width: 56, height: 56, fontSize: 28, fontWeight: 'bold', boxShadow: '0 2px 8px #0001', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               aria-label="Zoom In"
             >+
             </button>
             <button
               onClick={() => setZoom(Math.max(MIN_ZOOM, zoom - 0.1))}
-              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 56, height: 56, fontSize: 28, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              style={{ background: '#fff', border: '1.5px solid #e0e7ef', borderRadius: 12, width: 56, height: 56, fontSize: 28, fontWeight: 'bold', boxShadow: '0 2px 8px #0001', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               aria-label="Zoom Out"
             >−
             </button>
             <button
               onClick={() => resetZoom()}
-              style={{ background: '#fff', border: '1px solid #ccc', borderRadius: 8, width: 56, height: 56, fontSize: 20, fontWeight: 'bold', boxShadow: '0 2px 8px #0001' }}
+              style={{ background: '#fff', border: '1.5px solid #e0e7ef', borderRadius: 12, width: 56, height: 56, fontSize: 20, fontWeight: 'bold', boxShadow: '0 2px 8px #0001', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               aria-label="Reset Zoom"
             >⟳
             </button>
+            {/* Zoom Level Indicator */}
+            <div style={{ marginTop: 8, fontSize: 15, color: '#1B296D', fontWeight: 'bold', background: '#fff', borderRadius: 8, padding: '3px 12px', boxShadow: '0 2px 8px #0001', border: '1px solid #e0e7ef' }}>
+              {`${(zoom * 100).toFixed(0)}%`}
+            </div>
           </div>
           <div
             className="absolute inset-0 overflow-hidden"
@@ -894,7 +898,10 @@ function App() {
               {/* Enhanced instructions overlay when no components */}
               {components.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-gray-500 p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 float">
+                  <div
+                    className="text-center text-gray-500 p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 float"
+                    style={window.innerWidth <= 768 ? { marginTop: '-10vh', maxWidth: '90vw' } : {}}
+                  >
                     <div className="text-6xl mb-4">🚀</div>
                     <h3 className="text-2xl font-semibold mb-3 text-gray-700">
                       Canvas Kosong
