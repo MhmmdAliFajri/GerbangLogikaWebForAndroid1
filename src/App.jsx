@@ -47,6 +47,24 @@ function App() {
 
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Kunci scroll body saat drawer terbuka (mobile/WebView)
+  useEffect(() => {
+    if (drawerOpen && isMobileWebView) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100vw';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [drawerOpen, isMobileWebView]);
   const fileInputRef = useRef(null);
   const saveCircuit = useCircuitStore((s) => s.saveCircuit);
   const loadCircuit = useCircuitStore((s) => s.loadCircuit);
