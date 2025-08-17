@@ -9,6 +9,7 @@ const DraggableComponent = ({ component, children }) => {
     removeComponent,
     selectedComponent,
     selectComponent,
+    zoom,
   } = useCircuitStore();
   const dragRef = useRef(null);
 
@@ -56,12 +57,11 @@ const DraggableComponent = ({ component, children }) => {
   const handleMouseMove = (e) => {
     if (!isDragging) return;
 
-    const canvasRect = dragRef.current.closest(".canvas-area").getBoundingClientRect();
-    const newX = e.clientX - canvasRect.left - dragOffset.x;
-    const newY = e.clientY - canvasRect.top - dragOffset.y;
-
-    // Hilangkan constraint agar bisa drag ke mana saja (tak terbatas)
-    updateComponentPosition(component.id, { x: newX, y: newY });
+  const canvasRect = dragRef.current.closest(".canvas-area").getBoundingClientRect();
+  // Perhitungkan zoom agar posisi komponen tepat di bawah kursor
+  const newX = (e.clientX - canvasRect.left - dragOffset.x) / zoom;
+  const newY = (e.clientY - canvasRect.top - dragOffset.y) / zoom;
+  updateComponentPosition(component.id, { x: newX, y: newY });
   };
 
   const handleTouchMove = (e) => {
@@ -69,10 +69,10 @@ const DraggableComponent = ({ component, children }) => {
 
     const touch = e.touches[0];
     const canvasRect = dragRef.current.closest(".canvas-area").getBoundingClientRect();
-    const newX = touch.clientX - canvasRect.left - dragOffset.x;
-    const newY = touch.clientY - canvasRect.top - dragOffset.y;
-
-    updateComponentPosition(component.id, { x: newX, y: newY });
+  // Perhitungkan zoom agar posisi komponen tepat di bawah kursor
+  const newX = (touch.clientX - canvasRect.left - dragOffset.x) / zoom;
+  const newY = (touch.clientY - canvasRect.top - dragOffset.y) / zoom;
+  updateComponentPosition(component.id, { x: newX, y: newY });
     e.preventDefault();
   };
 
