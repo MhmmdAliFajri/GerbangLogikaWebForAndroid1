@@ -14,6 +14,15 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
 
 function App() {
+  // Deteksi mobile/webview
+  const isMobileWebView = typeof window !== 'undefined' && (window.innerWidth <= 768 || /wv|android|mobile|iphone|ipad/i.test(navigator.userAgent));
+
+  // Set zoom minimal 100% di mobile/webview saat pertama kali load
+  useEffect(() => {
+    if (isMobileWebView && zoom < 1) {
+      setZoom(1);
+    }
+  }, [isMobileWebView]);
   const {
     components,
     connections,
